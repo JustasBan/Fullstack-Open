@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Course = ({courses}) => {
-  console.log("this is a git test")
+  
   return (
 
     <div>
