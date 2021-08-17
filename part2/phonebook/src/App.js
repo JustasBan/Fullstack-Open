@@ -14,10 +14,36 @@ const Search = (props) =>(
     )
 
 const PersonForm = (props) => {
+
+  //adding to list
+  const addPerson = (event) => {
+    event.preventDefault()
+
+    const personObj = {name: props.newName, number: props.newNumber}
+
+    let found = false;
+
+    if (props.persons.filter(e => e.name === personObj.name).length > 0) {
+      found=true
+    }
+
+    if(found){
+      window.alert(personObj.name + ' already exists');
+
+    }
+    else{
+      props.setPersons(props.persons.concat(personObj))
+
+    }
+
+    props.setNewName('')
+    props.setNewNumber('')
+  }
+
   return(
     <div>
       <h2>Phonebook</h2>
-      <form onSubmit={props.addPerson}>
+      <form onSubmit={addPerson}>
 
         <div>
           name: <input value={props.newName} onChange={props.handleNameChange} />
@@ -58,31 +84,6 @@ const App = () => {
   const [ newNumber, setNewNumber ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
 
-  //adding to list
-  const addPerson = (event) => {
-    event.preventDefault()
-
-    const personObj = {name: newName, number: newNumber}
-
-    let found = false;
-
-    if (persons.filter(e => e.name === personObj.name).length > 0) {
-      found=true
-    }
-
-    if(found){
-      window.alert(personObj.name + ' already exists');
-
-    }
-    else{
-      setPersons(persons.concat(personObj))
-
-    }
-
-    setNewName('')
-    setNewNumber('')
-  }
-
   //handlers
   const handleNameChange = (event) =>{
     console.log(event.target.value)
@@ -105,7 +106,7 @@ const App = () => {
     <div>
 
     <Search newFilter={newFilter} handleFilterChange={handleFilterChange}/>
-    <PersonForm addPerson={addPerson} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
+    <PersonForm setPersons={setPersons} persons={persons} setNewName={setNewName} setNewNumber={setNewNumber} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
     <Persons personsToShow={persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))}/> 
 
     </div>
