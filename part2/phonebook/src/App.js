@@ -58,9 +58,6 @@ const App = () => {
   const [ newNumber, setNewNumber ] = useState('')
   const [ newFilter, setNewFilter ] = useState('')
 
-  //filtering
-  const personsToShow = persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
-
   //adding to list
   const addPerson = (event) => {
     event.preventDefault()
@@ -109,7 +106,7 @@ const App = () => {
 
     <Search newFilter={newFilter} handleFilterChange={handleFilterChange}/>
     <PersonForm addPerson={addPerson} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
-    <Persons personsToShow={personsToShow}/> 
+    <Persons personsToShow={persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))}/> 
 
     </div>
   )
