@@ -3,7 +3,10 @@ import axios from 'axios'
 
 const ListItem = (props) => {
   return (
-    <p>{props.name} {props.number}</p>
+    <div>
+      <p>{props.name}</p> 
+      <button onClick={() => props.setNewFilter(props.name)}>show</button>
+    </div>
   )
 }
 
@@ -13,6 +16,47 @@ const Search = (props) =>(
     < input value={props.newFilter} onChange={props.handleFilterChange}/>
     </div>
     )
+
+const GetWeather = ({capital}) => {
+
+  const [ weather, setWeather ] = useState([]) 
+  const api_key = process.env.REACT_APP_API_KEY
+
+    let source = 'http://api.weatherstack.com/current?access_key=' + api_key + '&query=' + capital
+  useEffect(() => {
+    
+    axios
+      .get(source)
+      .then(response => {
+        //console.log('promise fullfiled')
+        setWeather(response.data)
+      })
+  }, [])
+
+  if(weather.current != undefined)
+  {
+    return(
+    <div>
+      <h3>weather in {capital}</h3>
+      <p><strong>Temperature</strong> {weather.current.temperature} C</p>
+      {weather.current.weather_icons.map( icon =>
+        <img key={icon} src={icon}></img>
+      )}
+      <p><strong>Wind</strong> {weather.current.wind_speed} mph direction {weather.current.wind_dir}</p>
+
+    </div>
+    )
+  }
+  else{
+    return(
+      <div></div>
+    )
+  }
+  
+
+  
+
+}
 
 const Countries = (props) => {
 
@@ -33,7 +77,7 @@ const Countries = (props) => {
       return(
         <div>
           <h2>Results:</h2>
-          {props.countriesToShow.map(country => <ListItem key={country.name} name={country.name} number={country.number}/>)}
+          {props.countriesToShow.map(country => <ListItem key={country.name} name={country.name} setNewFilter={props.setNewFilter}/>)}
         </div>
       )
 
@@ -56,6 +100,8 @@ const Countries = (props) => {
             </div>)}
 
             {props.countriesToShow.map(country => <div key={country.name}><img width="150px" src={country.flag}></img></div>)}
+
+            {props.countriesToShow.map(country => <GetWeather key={country.name} capital={country.capital}/>)}
             
           </div>
         )
@@ -96,12 +142,14 @@ const App = () => {
         //console.log('promise fullfiled')
         setCountries(response.data)
       })
-  })
+  }, [])
+
+
 
   return(
     <div>
       <Search newFilter={newFilter} handleFilterChange={handleFilterChange}/>
-      <Countries countriesToShow={countries.filter(country => country.name.toLowerCase().includes(newFilter.toLowerCase()))}/>
+      <Countries setNewFilter={setNewFilter} countriesToShow={countries.filter(country => country.name.toLowerCase().includes(newFilter.toLowerCase()))}/>
     </div>
   )
 }
