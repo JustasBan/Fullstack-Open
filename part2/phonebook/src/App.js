@@ -32,8 +32,23 @@ const PersonForm = (props) => {
     }
 
     if(found){
-      window.alert(personObj.name + ' already exists');
 
+      let id = props.persons.filter(person => person.name === personObj.name).map(thing => thing.id)[0]
+      let tempPerson = props.persons.filter(person => person.id === id)
+
+      if(window.confirm(tempPerson.map(thing => thing.name) + ' is already added to phonebook, replace number?')){
+      
+      const changedPerson =  { ...tempPerson[0], number: props.newNumber}
+
+      serverComms
+        .change(changedPerson)
+        .then(response =>{
+
+          console.log('change promise fullfiled');
+
+          props.setPersons(props.persons.map(person => person.id !== id ? person : response.data))
+        })
+      }
     }
     else{
 
@@ -138,11 +153,27 @@ const App = () => {
     
   }
 
+  const replaceNum = ({id, newNum}) =>{
+    let tempPerson = persons.filter(person => person.id === id)
+    console.log(id);
+
+    if(window.confirm(tempPerson.map(thing => thing.name) + 'is already added to phonebook, replace number?')){
+      const changedPerson = { ...tempPerson, number: newNum}
+
+      serverComms
+        .change(changedPerson)
+        .then(response =>{
+          setPersons(persons.map(person => person.id !== id ? person : response.data))
+        })
+    }
+    
+  }
+
   return (
     <div>
 
     <Search newFilter={newFilter} handleFilterChange={handleFilterChange}/>
-    <PersonForm setPersons={setPersons} persons={persons} setNewName={setNewName} setNewNumber={setNewNumber} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
+    <PersonForm replaceNum={replaceNum} setPersons={setPersons} persons={persons} setNewName={setNewName} setNewNumber={setNewNumber} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
     <Persons personsToShow={persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))} deleteHandle={deleteHandle}/> 
 
     </div>
