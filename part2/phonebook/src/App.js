@@ -33,7 +33,12 @@ const PersonForm = (props) => {
 
     }
     else{
-      props.setPersons(props.persons.concat(personObj))
+
+      axios
+        .post('http://localhost:3001/persons', personObj)
+        .then(response => {
+          props.setPersons(props.persons.concat(personObj))
+        })
 
     }
 
