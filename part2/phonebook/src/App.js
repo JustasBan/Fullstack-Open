@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import serverComms from './services/serverComms'
 
 const ListItem = (props) => {
   return (
-    <p>{props.name} {props.number}</p>
+    <div>
+    <p> {props.id} {props.name} {props.number}</p>
+    <button onClick={() => props.deleteHandle(props.id)}>delete</button>
+    </div>
   )
 }
 
@@ -34,16 +37,18 @@ const PersonForm = (props) => {
     }
     else{
 
-      axios
-        .post('http://localhost:3001/persons', personObj)
-        .then(response => {
-          props.setPersons(props.persons.concat(personObj))
+      serverComms
+        .create(personObj)
+        .then(initialPerson => {
+
+          console.log('adding promise fullfiled');
+          props.setPersons(props.persons.concat(initialPerson))
+
+          props.setNewName('')
+          props.setNewNumber('')
         })
 
     }
-
-    props.setNewName('')
-    props.setNewNumber('')
   }
 
   return(
@@ -71,7 +76,7 @@ const Persons = (props) => {
   return(
     <div>
       <h2>Numbers</h2>
-      {props.personsToShow.map(person => <ListItem key={person.name} name={person.name} number={person.number}/>)}
+      {props.personsToShow.map(person => <ListItem key={person.name} name={person.name} number={person.number} id={person.id} deleteHandle={props.deleteHandle}/>)}
     </div>
   )
 }
@@ -86,17 +91,13 @@ const App = () => {
   const [ newFilter, setNewFilter ] = useState('')
 
   useEffect(() => {
-    console.log('effect')
-
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fullfilled')
-        setPersons(response.data)
+    serverComms
+      .getAll()
+      .then(initialPerson => {
+        console.log('getting promise fullfilled')
+        setPersons(initialPerson)
       })
   }, [])
-
-  console.log('render', persons.length)
 
   //handlers
   const handleNameChange = (event) =>{
@@ -116,12 +117,33 @@ const App = () => {
 
   }
 
+  const deleteHandle = id =>{
+
+    let tempPerson = persons.filter(person => person.id === id)
+
+    if(window.confirm("Dou you want to delete " + tempPerson.map(thing => thing.name) + " ?")){
+      console.log('deleted ' + id);
+
+      serverComms
+        .erase(id)
+        .then(response => {
+          console.log('delete promise fullfilled');
+          setPersons(persons.filter(person => person.id !== id))
+        })
+    }
+    else
+    {
+      console.log('delete of ' + id + ' cancelled');
+    }
+    
+  }
+
   return (
     <div>
 
     <Search newFilter={newFilter} handleFilterChange={handleFilterChange}/>
     <PersonForm setPersons={setPersons} persons={persons} setNewName={setNewName} setNewNumber={setNewNumber} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange}/>
-    <Persons personsToShow={persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))}/> 
+    <Persons personsToShow={persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))} deleteHandle={deleteHandle}/> 
 
     </div>
   )
